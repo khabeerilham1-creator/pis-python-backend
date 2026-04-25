@@ -3,10 +3,10 @@ from app.routes.auth import router as auth_router
 
 app = FastAPI()
 
-# ✅ IMPORTANT: NO prefix here
+# ✅ include router (NO extra prefix)
 app.include_router(auth_router)
 
-# optional root (so / doesn't show 404)
+# optional root
 @app.get("/")
 def root():
     return {"message": "API running"}
