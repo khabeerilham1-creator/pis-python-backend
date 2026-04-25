@@ -1,28 +1,33 @@
 from fastapi import APIRouter, HTTPException
 from app.core.database import users_collection
 
-router = APIRouter()
+router = APIRouter(prefix="/auth")
 
 @router.post("/login")
 def login(data: dict):
     username = data.get("username")
     password = data.get("password")
 
-    # 🔥 FIX: use username field
-    user = users_collection.find_one({"username": username})
+    # 🔥 Try BOTH username and email (important fix)
+    user = users_collection.find_one({
+        "$or": [
+            {"username": username},
+            {"email": username}
+        ]
+    })
 
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
 
-    # 🔥 simple password check
-    if password != user["password"]:
-        raise HTTPException(status_code=401, detail="Invalid password")
+    # 🔥 FORCE STRING COMPARE (fix type issues)
+    if str(password).strip() != str(user.get("password", "")).strip():
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    # optional approval check
+    # approval check
     if not user.get("is_approved", True):
         raise HTTPException(status_code=403, detail="Not approved")
 
     return {
         "access_token": "dummy_token",
-        "user": username
+        "user": user.get("username") or user.get("email")
     }
