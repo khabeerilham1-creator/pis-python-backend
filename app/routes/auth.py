@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.core.database import users_collection
 
-# ✅ single prefix only here
+# ✅ single prefix
 router = APIRouter(prefix="/auth")
 
 @router.post("/login")
@@ -9,24 +9,20 @@ def login(data: dict):
     username = data.get("username")
     password = data.get("password")
 
-    print("LOGIN INPUT:", username)
-
-    # ✅ search user
+    # find user
     user = users_collection.find_one({
         "username": username
     })
 
-    print("FOUND USER:", user)
-
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
 
-    # ✅ simple password check (no hash)
+    # simple password check
     if str(password).strip() != str(user.get("password", "")).strip():
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    # ✅ approval check (safe)
-    if str(user.get("is_approved", "true")).lower() != "true":
+    # approval check
+    if not user.get("is_approved", True):
         raise HTTPException(status_code=403, detail="Not approved")
 
     return {
