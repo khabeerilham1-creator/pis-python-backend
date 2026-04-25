@@ -5,7 +5,7 @@ MONGO_URI = os.getenv("MONGO_URI")
 
 client = MongoClient(MONGO_URI)
 
-# ✅ FIXED DATABASE NAME (IMPORTANT)
+# ✅ IMPORTANT: correct DB name
 db = client["pis"]
 
 users_collection = db["users"]
