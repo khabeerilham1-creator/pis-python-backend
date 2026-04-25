@@ -1,12 +1,27 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.routes.auth import router as auth_router
 
 app = FastAPI()
 
-# ✅ include router (NO extra prefix)
+# ✅ CORS FIX (VERY IMPORTANT)
+origins = [
+    "https://clinic-client-nine.vercel.app",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# routes
 app.include_router(auth_router)
 
-# optional root
+# test route
 @app.get("/")
 def root():
     return {"message": "API running"}
